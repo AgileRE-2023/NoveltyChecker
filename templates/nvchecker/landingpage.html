@@ -1,0 +1,74 @@
+{% extends "base.html" %} {% block title %}HomePage{% endblock %}
+<!-- Block Liner -->
+{% load static %}
+{%block content %}
+
+<!-- Ngodingnya disini -->
+
+<head>
+    <style>
+        body {
+            background-image: url("{% static 'nvchecker/images/Landing.png' %}");
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4">
+        <div class="container">
+            <div class="row" style="font-size: 32px; cursor: pointer;">
+                <div class="col-1 offset-1" style="margin-left: 950px; text-align: end;"><a href=# style="color: white; text-decoration: none;">SignIn</a>
+                </div>
+                <div class="col-1 offset-1" style="margin-left: 50px; width: 164px; height: 48px; border: 1px solid #fff; text-align: center;"><a href=# style="color: white; text-decoration: none;">SignUp</a>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="container">
+            <div class="row">
+                <div class="col-5 offset-1" style="margin-top: 100px; width: 508px; height: 445px;">
+                    <img src="{% static 'nvchecker/images/Layer2.png'%}" class="card-img-top" alt="..." ></div>
+                <div class="col-5 offset-1" style="color: white;">
+                    <div style="font-size: 60px;">
+                        <b>
+                            The Easiest Way
+                            <br> to Preview
+                            <br> Journals
+                        </b>
+                    </div>
+                    <div class="my-5" style="font-size: 21px;">Unlock the Power of Knowledge: Discover the
+                        <br>Ultimate Journal Review Hub!
+                    </div>
+                    <div class="col-5" style="margin-top: 100px; cursor: pointer; margin-left: -30px; width: 517px; height: 66px; background-color: #f0f0f0; border-radius: 20px; display: flex;">
+                        <p style="color: #888888; margin-top:20px; margin-left: 15px; margin-right:87.7px; border: none;">lets get started</p>
+                        <div style=" margin-left: 200px; width: 108.57px; height: 66px; background-color: #2EE8B6; border-radius: 20px;">
+                            <a href=#>
+                            <div style="margin-top:10px; margin-left:30px;"><svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" id="arrow" viewBox="0 0 18 14">
+                                <g fill="none" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                <path d="M1 7h16M11 1l6 6-6 6"></path>
+                            </div></a>
+                        </div>
+                        
+                    </div>
+
+                    <br><br><br><br>
+
+                </div>
+            </div>
+        </div>
+    </div>
+       
+        
+     
+        
+  </body>
+  
+
+
+      
+
+<!-- Batas bawah ngoding -->
+{% endblock %}
