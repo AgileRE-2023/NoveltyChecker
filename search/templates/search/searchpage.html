@@ -1,0 +1,110 @@
+{% extends "base.html" %} {% block title %}Search{% endblock %}
+<!-- Block Liner -->
+{% load static %} {%block content %}
+<!-- Ngodingnya disini -->
+
+<style>
+  .ungu-bro-bg {
+    background-color: #422b73 !important;
+  }
+  .ungu-bro-color {
+    color: #422b73 !important;
+  }
+  .ungu-bro-border {
+    border-color: #422b73 !important;
+  }
+</style>
+
+<div>
+  <div class="my-4 d-flex flex-row justify-content-end align-items-center">
+    <span class="h-fit self-center text-xl border-b-2 border-black"
+      >Username</span
+    >
+
+    <a href=""
+      ><span
+        style="font-size: 50px"
+        class="material-symbols-outlined ungu-bro-color"
+      >
+        account_circle
+      </span></a
+    >
+  </div>
+  <h4 style="color: #071c4d">Start Exploring</h4>
+  <div>
+    Discover the most reliable. relevant, up-to-date research. All in one place.
+  </div>
+  <div
+    class="d-flex col-2 border-bottom border-black border-4 text-center py-2"
+  >
+    <span class="material-symbols-outlined ungu-bro-color"> find_in_page </span>
+    <div class="">Documents</div>
+  </div>
+  <div class="border-bottom border-black border-2"></div>
+</div>
+<div class="py-5">
+  <div class="form-floating mb-3 col-sm-4 offset-sm-0">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="Insert Title Here"
+    />
+    <label for="floatingInput">Title</label>
+  </div>
+  <div class="d-flex flex-row align-items-end justify-content-between">
+    <div class="form-floating col-sm-10">
+      <textarea
+        class="form-control"
+        placeholder="Insert Abstract Here"
+        id="floatingTextarea2"
+        style="height: 200px"
+      ></textarea>
+      <label for="floatingTextarea2">Abstract</label>
+    </div>
+    <div class="d-flex flex-row">
+      <button style="height: 40px" class="btn h-fit-content">Reset</button>
+      <a href="{% url 'report' %}">
+        <button
+          style="height: 40px"
+          class="btn btn-primary ungu-bro-bg border-0 d-flex text-decoration-none"
+        >
+          <span class="me-2 text-decoration-none">Search</span
+          ><span class="material-symbols-outlined me-1 text-decoration-none">
+            search
+          </span>
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+<div class="border-bottom border-black border-2"></div>
+<div class="py-5">
+  <div class="d-flex col-2 border-bottom border-black border-4 text-center">
+    <div class="py-2">Search History</div>
+  </div>
+  <div class="">
+    <div
+      class="d-flex flex-row justify-content-between align-items-center py-4"
+    >
+      <div class="d-flex flex-row">
+        <div class="me-4">1</div>
+        <div class="me-3">
+          <div class="d-flex justify-content-center align-items-center">
+            <span class="material-symbols-outlined ungu-bro-color me-2">
+              edit
+            </span>
+            <span class="text-body-secondary">TITLE</span>
+            <span>(covid-19)</span>
+          </div>
+        </div>
+      </div>
+      <div class="ungu-bro-color fw-semibold">2,631 results</div>
+    </div>
+    <div class="border-bottom border-light-subtle border-2"></div>
+  </div>
+</div>
+<div class="border-bottom border-black border-2"></div>
+
+<!-- Batas bawah ngoding -->
+{% endblock %}
