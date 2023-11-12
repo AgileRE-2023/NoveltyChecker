@@ -1,0 +1,128 @@
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %}
+<!-- Block Liner -->
+{% load static %} {%block content %}
+<!-- Ngodingnya disini -->
+
+<div class="row" style="margin-top: 150px">
+  <div class="col"></div>
+  <div class="col-6">
+    <div class="card">
+      <div
+        class="card-header"
+        style="background-color: rgb(33, 0, 99); color: white"
+      >
+        <h3>Register</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-8">
+            <div class="row mb-3">
+              <label for="name" class="col-sm-4 col-form-label text-end"
+                >Name</label
+              >
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="name" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="email" class="col-sm-4 col-form-label text-end"
+                >E-Mail Address</label
+              >
+              <div class="col-sm-8">
+                <input type="email" class="form-control" id="email" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="phone" class="col-sm-4 col-form-label text-end"
+                >Phone Number</label
+              >
+              <div class="col-sm-8">
+                <input type="phone" class="form-control" id="phone" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="password" class="col-sm-4 col-form-label text-end"
+                >Password</label
+              >
+              <div class="col-sm-8">
+                <input type="password" class="form-control" id="password" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label
+                for="confirmation_password"
+                class="col-sm-4 col-form-label text-end"
+                >Confirm Password</label
+              >
+              <div class="col-sm-8">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirmation_password"
+                />
+              </div>
+            </div>
+            <div class="d-flex justify-content-center">
+              <input
+                type="button"
+                class="btn btn-primary px-4"
+                style="background-color: rgb(33, 0, 99)"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmation"
+                value="Save"
+              />
+            </div>
+          </div>
+          <div class="col"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col"></div>
+</div>
+<div class="modal fade" id="confirmation" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div
+        class="modal-body d-flex align-items-center"
+        style="min-height: 300px"
+      >
+        <div class="w-100">
+          <h3
+            class="text-center"
+            style="color: rgb(33, 0, 99); margin-bottom: 50px"
+          >
+            Is the data you input correct?
+          </h3>
+          <div class="d-flex justify-content-center">
+            <a href="{% url 'signin' %}">
+              <button
+                type="button"
+                class="btn btn-info me-2 text-white"
+                style="min-width: 100px; background-color: rgb(33, 0, 99)"
+              >
+                Yes
+              </button>
+            </a>
+            <button
+              type="button"
+              class="btn btn-danger ms-2"
+              style="
+                min-width: 100px;
+                background-color: azure;
+                color: rgb(33, 0, 99);
+              "
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batas bawah ngoding -->
+  {% endblock %}
+</div>
