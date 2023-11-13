@@ -23,6 +23,9 @@ def signup(request):
         pass1=request.POST.get('password')
         pass2=request.POST.get('confirmation_password')
 
+        if uname == '' or email == '' or pass1 == '' or pass2 == '':
+            return render(request, 'accounts/signup.html', {'error':'Please fill all the fields'})
+
         if pass1 != pass2:
             return render(request, 'accounts/signup.html', {'error':'Passwords do not match'})
         else:
