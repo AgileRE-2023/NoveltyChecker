@@ -19,10 +19,12 @@ def search(request):
             scopus_id = scopus.dataId()
             scopus_title = scopus.dataTitle()
             scopus_abstract = scopus.dataAbstract()
+            scopus_num_found = scopus.numFound()
             # scopus_doi = scopus.dataDoi()
             print(scopus_id)
             print(scopus_title)
             print(scopus_abstract)
+            print(scopus_num_found)
             # print(scopus_doi)
             
             return render(request, 'search/searchreport.html', {'scopus_id':scopus_id, 'scopus_title':scopus_title, 'scopus_abstract':scopus_abstract})
@@ -40,6 +42,7 @@ class SearchScopus():
     config = json.load(con_file)
     con_file.close()
     query = ''
+    num_found = ''
     scopus_id = []
     scopus_title = []
     scopus_abstract = []
@@ -67,6 +70,7 @@ class SearchScopus():
         result = json.dumps(doc_srch.results, indent=4)
         print(len(doc_srch.results))
         print(result)
+        self.num_found = doc_srch.tot_num_res
         for i in range(10):
             scp_clear = doc_srch.results[i]['dc:identifier'].replace('SCOPUS_ID:','')
             self.scopus_title.append(doc_srch.results[i]['dc:title'])
@@ -81,3 +85,6 @@ class SearchScopus():
     
     def dataAbstract(self):
         return self.scopus_abstract
+    
+    def numFound(self):
+        return self.num_found
