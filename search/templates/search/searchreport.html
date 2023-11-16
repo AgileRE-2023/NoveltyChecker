@@ -2,10 +2,207 @@
 <!-- Block Liner -->
 {% load static %} {%block content %}
 <!-- Ngodingnya disini -->
+<style>
+  .ungu-bro-bg {
+    background-color: #422b73 !important;
+  }
+  .ungu-bro-color {
+    color: #422b73 !important;
+  }
+  .ungu-bro-border {
+    border-color: #422b73 !important;
+  }
+  .with-shadow {
+    border: 1px solid #ced4da;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menambahkan bayangan */
+  }
+  .chart-heading {
+    font-family: 'Poppins', sans-serif;
+    color: #1e1e1e;
+    text-transform: uppercase;
+    font-size: 20px;
+  }
 
-<div class="container">
-  <h1>Search Report</h1>
+  .chart-container{
+      width: 200px;
+  }
+
+  .report-stats{
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0 auto;
+  }
+
+  .report-stats .details ul {
+      list-style: none;
+      padding: 0;
+  }
+
+  .report-stats .details ul li {
+      font-size: 16px;
+      margin: 12px 0;
+      text-transform: uppercase;
+  }
+
+  .report-stats .details .percentage {
+      font-weight: 700;
+      color: brown
+  }
+</style>
+
+<div>
+  <div class="my-4 d-flex flex-row justify-content-end align-items-center">
+    <span class="h-fit self-center text-xl border-b-2 border-black"
+      >Username</span
+    >
+
+    <a href=""
+      ><span
+        style="font-size: 50px"
+        class="material-symbols-outlined ungu-bro-color"
+      >
+        account_circle
+      </span></a
+    >
+  </div>
+  <h3 style="color: #071c4d"><strong>RESULTS</strong></h3>
+<div class="py-3">
+  <h4 style="color: #071c4d">TITLE</h4>
+  <div class="form-floating mb-3 col-sm-12 offset-sm-0">
+    <div
+      id="Input"
+      class="form-control with-shadow"
+      style="border: 1px solid #ced4da; padding: 10px; max-height: 200px; overflow-y: auto"
+    >
+      Isi judul
+    </div>
+  </div>
+  
+  <h4 style="color: #071c4d">ABSTRAK</h4>
+  <div class="form-floating mb-3 col-sm-12 offset-sm-0">
+    <div
+      id="Input"
+      class="form-control with-shadow"
+      style="border: 1px solid #ced4da; padding: 10px; max-height: 200px; overflow-y: auto; height: 300px"
+    >
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque eveniet
+    dignissimos, commodi debitis vero numquam iste aliquid dolorum non,
+    suscipit totam magnam nobis rerum maiores inventore reiciendis veniam
+    recusandae ipsa. Labore minus dignissimos odit voluptate dolor
+    reiciendis praesentium voluptates! Tenetur, facilis! Laborum animi
+    neque quae voluptates quisquam provident porro, eveniet mollitia ex
+    laboriosam maiores voluptatibus optio totam nemo et non. Sequi, hic
+    voluptatum voluptates autem vero, eligendi, possimus amet nesciunt
+    fugit et totam non ea deserunt illo reprehenderit aspernatur optio
+    sapiente. Eum iusto placeat dignissimos dicta. Possimus quidem autem
+    numquam? Dignissimos corrupti deleniti quod totam modi nobis mollitia
+    aspernatur sapiente, voluptas, impedit nihil ad, perspiciatis ullam
+    perferendis voluptates voluptatem cum nisi. Sapiente repellendus
+    repudiandae perspiciatis labore sint mollitia ea ut! Iste aperiam vero
+    fuga ab aspernatur voluptatibus possimus itaque eligendi iusto fugiat
+    sequi facilis facere saepe, explicabo illum unde? Sint quo ea mollitia
+    sit dolor et maiores in ducimus excepturi!
+    </div>
+  </div>  
+  
+  <div class="d-flex flex-row">
+    <div>
+      <p>
+      </p>
+    </div>
+    <div class="report-stats d-flex flex-column justify-content-center" style="position: relative; flex-direction: column; align-items: center;justify-content:center;">
+      <div class="chart-container" style="position: relative;">
+          <canvas class="my-chart  mt-0" style="width: 300px; height: 300px;justify-self:center;"></canvas>
+          <h4 style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); margin-top:10px;">90</h4>
+          <div class="details" style="margin-top: 10px;">
+            <ul></ul>
+        </div>
+        <h2 class="chart-heading" style="text-align: center;">Similarity</h2>
+      </div>
+  </div>
+
+    <div class="d-flex flex-column justify-content-center">
+    <button
+      style="width: 195px; height: 40px; background-color: #F8F6FB; color: #412A6E;"
+      class="btn btn-primary border-0 d-flex text-decoration-none align-self-end"
+    >
+      <span class="me-2 text-decoration-none">Crate a new search</span>
+      <span class="material-symbols-outlined me-1 text-decoration-none">search</span>
+    </button>
+    <button
+      style="width: 195px; height: 40px; "
+      class="btn btn-primary ungu-bro-bg border-0 d-flex text-decoration-none align-self-end mt-2"
+    >
+      <span class="me-2 text-decoration-none">List Recommendation  </span>
+    </button>
+    </div>
+  </div>
+
 </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const generateChartData = (passedPercentage, failedPercentage) => {
+    const total = passedPercentage + failedPercentage;
+
+    return {
+        // labels: ["Passed", "Failed"],
+        data: [passedPercentage, failedPercentage],
+        colors: ['#071c4d', '#787878'],
+        total: total,
+    };
+};
+
+const myData = {
+    a: 660,
+};
+
+myData.b= 100 - myData.a;
+
+const chartData = generateChartData(myData.a, myData.b);
+
+const myChart = document.querySelector(".my-chart");
+const ul = document.querySelector(".report-stats .details ul");
+
+new Chart(myChart, {
+    type: "doughnut",
+    data: {
+        labels: chartData.labels,
+        datasets: [
+            {
+                label: "Report Value",
+                data: chartData.data,
+                backgroundColor: chartData.colors,
+            },
+        ],
+    },
+    options: {
+        borderWidth: 5,
+        borderRadius: 2,
+        hoverBorderWidth: 0,
+        plugins: {
+            legend: {
+                display: true,
+            },
+        },
+    },
+});
+
+const populateUl = () => {
+    chartData.labels.forEach((l, i) => {
+        let li = document.createElement("li");
+        li.innerHTML = `${l}:<span class='percentage'>${(chartData.data[i] / chartData.total * 100).toFixed(2)}%</span>`;
+        ul.appendChild(li);
+    });
+};
+
+populateUl();
+
+</script>
 
 <!-- Batas bawah ngoding -->
 {% endblock %}
