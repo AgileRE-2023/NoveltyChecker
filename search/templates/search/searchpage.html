@@ -43,40 +43,50 @@
   <div class="border-bottom border-black border-2"></div>
 </div>
 <div class="py-5">
-  <div class="form-floating mb-3 col-sm-4 offset-sm-0">
-    <input
-      type="text"
-      class="form-control"
-      id="floatingInput"
-      placeholder="Insert Title Here"
-    />
-    <label for="floatingInput">Title</label>
-  </div>
-  <div class="d-flex flex-row align-items-end justify-content-between">
-    <div class="form-floating col-sm-10">
-      <textarea
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="form-floating mb-3 col-sm-4 offset-sm-0">
+      <input
+        type="text"
         class="form-control"
-        placeholder="Insert Abstract Here"
-        id="floatingTextarea2"
-        style="height: 200px"
-      ></textarea>
-      <label for="floatingTextarea2">Abstract</label>
+        id="floatingInput"
+        placeholder="Insert Title Here"
+        name="title"
+      />
+      <label for="floatingInput">Title</label>
     </div>
-    <div class="d-flex flex-row">
-      <button style="height: 40px" class="btn h-fit-content">Reset</button>
-      <a href="{% url 'report' %}">
+    <div class="d-flex flex-row align-items-end justify-content-between">
+      <div class="form-floating col-sm-10">
+        <textarea
+          class="form-control"
+          placeholder="Insert Abstract Here"
+          id="floatingTextarea2"
+          style="height: 200px"
+          name="abstract"
+        ></textarea>
+        <label for="floatingTextarea2">Abstract</label>
+      </div>
+      <div class="d-flex flex-row">
+        <button
+          style="height: 40px"
+          class="btn btn-outline-danger ungu-bro-border ungu-bro-color mx-2"
+        >
+          Reset
+        </button>
         <button
           style="height: 40px"
           class="btn btn-primary ungu-bro-bg border-0 d-flex text-decoration-none"
+          type="submit"
+          value="Sign In"
         >
           <span class="me-2 text-decoration-none">Search</span
           ><span class="material-symbols-outlined me-1 text-decoration-none">
             search
           </span>
         </button>
-      </a>
+      </div>
     </div>
-  </div>
+  </form>
 </div>
 <div class="border-bottom border-black border-2"></div>
 <div class="py-5">
