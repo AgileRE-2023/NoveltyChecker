@@ -137,4 +137,4 @@ GitHub.sublime-settings
 .history
 
 # Json Output
-config.json
+dump.json
