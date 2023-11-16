@@ -80,4 +80,4 @@ class SearchScopus():
         return self.scopus_title
     
     def dataAbstract(self):
-        return self.dataAbstract
+        return self.scopus_abstract
