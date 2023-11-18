@@ -124,14 +124,14 @@ class SearchScopus():
         return api_similarities
 
     def calculate_novelty(self, num_searched_titles, avg_similarity):
-        if num_searched_titles < 5 or avg_similarity<=5:
-            return 4
-        elif 5 <= num_searched_titles <= 100 or avg_similarity <= 10:
-            return 3
-        elif 100 <= num_searched_titles <= 6000 or avg_similarity <= 15:
-            return 2
-        elif 6000 <= num_searched_titles <= 10000000 or avg_similarity <= 20:
+        if 6000 <= num_searched_titles <= 10000000 or avg_similarity >= 12:
             return 1
+        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10:
+            return 2
+        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5:
+            return 3
+        elif num_searched_titles < 5 or avg_similarity>=3:
+            return 4
         
         return None
 
