@@ -5,6 +5,9 @@ from elsapy.elsdoc import AbsDoc
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.discriminant_analysis import StandardScaler
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
@@ -65,7 +68,7 @@ class SearchScopus():
         self.query = query
 
     def getAbstract(self):
-        for i in range(10):
+        for i in range(min(10, len(self.scopus_id))):
             scp_doc = AbsDoc(scp_id = self.scopus_id[i])
             if scp_doc.read(self.client):
                 self.scopus_abstract.append(scp_doc.data["coredata"]["dc:description"])
@@ -123,17 +126,36 @@ class SearchScopus():
 
         return api_similarities
 
-    def calculate_novelty(self, num_searched_titles, avg_similarity):
-        if 6000 <= num_searched_titles <= 10000000 or avg_similarity >= 12:
-            return 1
-        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10:
-            return 2
-        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5:
-            return 3
-        elif num_searched_titles < 5 or avg_similarity>=3:
-            return 4
+    def calculate_novelty(self, num_searched_titles, similarities, high_similarity_threshold=0.3):
+        if num_searched_titles < 4 or len(similarities) < 4:
+            return None
+
+        similarities_array = np.array([[sim] for sim in similarities])
+        high_similarity_count = sum(1 for sim in similarities if sim > high_similarity_threshold)
+        high_similarity_column = np.full((len(similarities), 1), high_similarity_count)
+        data_for_clustering = np.concatenate((similarities_array, high_similarity_column), axis=1)
+        scaler = StandardScaler()
+        data_for_clustering = scaler.fit_transform(data_for_clustering)
+        kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42, n_init=10)
+        kmeans.fit(data_for_clustering)
+        cluster_labels = kmeans.labels_
+        avg_similarity_per_cluster = [np.mean(np.array(similarities)[cluster_labels == i]) for i in range(4)]
+        novelty_cluster = avg_similarity_per_cluster.index(max(avg_similarity_per_cluster))+1
+        return novelty_cluster
+
+    
+    
+    # def calculate_novelty(self, num_searched_titles, avg_similarity):
+    #     if 6000 <= num_searched_titles <= 10000000 or avg_similarity >= 12:
+    #         return 1
+    #     elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10:
+    #         return 2
+    #     elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5:
+    #         return 3
+    #     elif num_searched_titles < 5 or avg_similarity>=3:
+    #         return 4
         
-        return None
+    #     return None
 
     def getScopusData(self, user_abstract):
         doc_srch = ElsSearch(self.query, 'scopus')
@@ -146,13 +168,16 @@ class SearchScopus():
             scp_clear = doc_srch.results[i]['dc:identifier'].replace('SCOPUS_ID:', '')
             self.scopus_title.append(doc_srch.results[i]['dc:title'])
             self.scopus_id.append(scp_clear)
+            
+        self.scopus_abstract = []
 
         if num_results > 0:
             self.scopus_abstract = self.getAbstract()
 
             # Hitung nilai novelty
-            avg_similarity = sum(self.calculate_similarity_for_all(user_abstract)) / len(self.scopus_id)
-            novelty = self.calculate_novelty(self.num_found, avg_similarity)
+            similarities = self.calculate_similarity_for_all(user_abstract)
+            avg_similarity = sum(similarities) / len(self.scopus_id)
+            novelty = self.calculate_novelty(self.num_found, similarities)
 
             # Print nilai novelty
             print(self.num_found)
