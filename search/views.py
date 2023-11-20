@@ -12,9 +12,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 import nltk
+import ast
 
-# nltk.download('stopwords')
-# nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('punkt')
 
 
 def search(request):
@@ -32,6 +33,7 @@ def search(request):
             scopus_title = scopus.dataTitle()
             scopus_abstract = scopus.dataAbstract()
             scopus_num_found = scopus.numFound()
+            novelty_grade = scopus.noveltyGrade()
 
             # Print hasil ke konsol
             print("Scopus ID:", scopus_id)
@@ -41,7 +43,7 @@ def search(request):
 
             similarities = scopus.calculate_similarity_for_all(user_abstract) 
 
-            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'similarities': similarities, 'scopus_num_found': scopus_num_found})
+            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'similarities': similarities, 'novelty_grade':novelty_grade, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract})
 
     return render(request, 'search/searchpage.html')
 
@@ -49,7 +51,25 @@ def report(request):
     return render(request, 'search/searchreport.html')
 
 def list(request):
-    return render(request, 'search/searchlist.html')
+    if request.method == 'POST':
+        scopus_id = ast.literal_eval(request.POST.get('scopus_id'))
+        scopus_title = ast.literal_eval(request.POST.get('scopus_title'))
+        scopus_abstract = ast.literal_eval(request.POST.get('scopus_abstract'))
+        scopus_num_found = request.POST.get('scopus_num_found')
+        scopus_all = []
+        
+        for i in range(min(10, len(scopus_id))):
+            entry = {
+                'scopus_id': scopus_id[i],
+                'scopus_title': scopus_title[i],
+                'scopus_abstract': scopus_abstract[i]
+            }
+            scopus_all.append(entry)
+
+        return render(request, 'search/searchlist.html', {'scopus_all': scopus_all, 'scopus_num_found': scopus_num_found})
+
+    elif request.method == 'GET':
+        return render(request, 'search/searchlist.html')
 
 class SearchScopus():
     con_file = open("config.json")
@@ -61,6 +81,8 @@ class SearchScopus():
     scopus_title = []
     scopus_abstract = []
     scopus_doi = []
+    novelty_grade = 0
+    highest_similarity = 0
 
     client = ElsClient(config['apikey'])
 
@@ -141,6 +163,8 @@ class SearchScopus():
         cluster_labels = kmeans.labels_
         avg_similarity_per_cluster = [np.mean(np.array(similarities)[cluster_labels == i]) for i in range(4)]
         novelty_cluster = avg_similarity_per_cluster.index(max(avg_similarity_per_cluster))+1
+
+        self.novelty_grade = novelty_cluster
         return novelty_cluster
 
     
@@ -168,6 +192,11 @@ class SearchScopus():
             scp_clear = doc_srch.results[i]['dc:identifier'].replace('SCOPUS_ID:', '')
             self.scopus_title.append(doc_srch.results[i]['dc:title'])
             self.scopus_id.append(scp_clear)
+
+            if 'prism:doi' in doc_srch.results[i]:
+                self.scopus_doi.append(doc_srch.results[i]['prism:doi'])
+            else:
+                self.scopus_doi.append('None')
             
         self.scopus_abstract = []
 
@@ -203,3 +232,6 @@ class SearchScopus():
 
     def numFound(self):
         return self.num_found
+    
+    def noveltyGrade(self):
+        return self.novelty_grade
