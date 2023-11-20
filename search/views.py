@@ -68,7 +68,7 @@ class SearchScopus():
         self.query = query
 
     def getAbstract(self):
-        for i in range(10):
+        for i in range(min(10, len(self.scopus_id))):
             scp_doc = AbsDoc(scp_id = self.scopus_id[i])
             if scp_doc.read(self.client):
                 self.scopus_abstract.append(scp_doc.data["coredata"]["dc:description"])
@@ -136,7 +136,7 @@ class SearchScopus():
         data_for_clustering = np.concatenate((similarities_array, high_similarity_column), axis=1)
         scaler = StandardScaler()
         data_for_clustering = scaler.fit_transform(data_for_clustering)
-        kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42)
+        kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42, n_init=10)
         kmeans.fit(data_for_clustering)
         cluster_labels = kmeans.labels_
         avg_similarity_per_cluster = [np.mean(np.array(similarities)[cluster_labels == i]) for i in range(4)]
@@ -168,6 +168,8 @@ class SearchScopus():
             scp_clear = doc_srch.results[i]['dc:identifier'].replace('SCOPUS_ID:', '')
             self.scopus_title.append(doc_srch.results[i]['dc:title'])
             self.scopus_id.append(scp_clear)
+            
+        self.scopus_abstract = []
 
         if num_results > 0:
             self.scopus_abstract = self.getAbstract()
