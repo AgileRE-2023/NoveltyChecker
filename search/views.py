@@ -104,7 +104,7 @@ class SearchScopus():
     def getAbstract(self):
         for i in range(min(10, len(self.scopus_id))):
             scp_doc = AbsDoc(scp_id = self.scopus_id[i])
-            if scp_doc.read(self.client):
+            if scp_doc.read(self.client):   
                 self.scopus_abstract.append(scp_doc.data["coredata"]["dc:description"])
                 # self.scopus_doi.append(scp_doc.data["coredata"]["prism:url"])
             else:
@@ -148,6 +148,7 @@ class SearchScopus():
             similarity_matrix = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix)
             
             # Convert similarity to percentage
+
             similarity_percentage = round(similarity_matrix[0][1] * 100, 1)
             self.scopus_similarities.append(similarity_percentage)
             # print(self.scopus_similarities)
@@ -233,6 +234,7 @@ class SearchScopus():
         
         return self.keyword
 
+
     def getAllSimilarity(self):
         print(self.scopus_similarities)
         return self.scopus_similarities
@@ -248,10 +250,10 @@ class SearchScopus():
 
     def numFound(self):
         return self.num_found
-    
+
     def noveltyGrade(self):
         return self.novelty_grade
-    
+
     def keywordFound(self):
         return self.keyword_found
     
