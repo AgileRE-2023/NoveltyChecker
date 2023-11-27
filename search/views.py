@@ -1,3 +1,4 @@
+import ast
 from django.shortcuts import render
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
@@ -35,7 +36,10 @@ def search(request):
             scopus_abstract = scopus.dataAbstract()
             scopus_num_found = scopus.numFound()
             scopus_keyword_found = scopus.keywordFound()
-
+            novelty_grade = scopus.noveltyGrade()
+            highest_similarity = scopus.highest_similarity_percentage()
+            scopus_similarities = scopus.getAllSimilarity()    
+            
             # Print hasil ke konsol
             print("Scopus ID:", scopus_id)
             print("Title:", scopus_title)
@@ -45,7 +49,7 @@ def search(request):
 
             similarities = scopus.calculate_similarity_for_all(user_abstract) 
 
-            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'similarities': similarities, 'scopus_num_found': scopus_num_found})
+            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
 
     return render(request, 'search/searchpage.html')
 
@@ -53,8 +57,28 @@ def report(request):
     return render(request, 'search/searchreport.html')
 
 def list(request):
-    return render(request, 'search/searchlist.html')
+    if request.method == 'POST':
+        scopus_id = ast.literal_eval(request.POST.get('scopus_id'))
+        scopus_title = ast.literal_eval(request.POST.get('scopus_title'))
+        scopus_abstract = ast.literal_eval(request.POST.get('scopus_abstract'))
+        scopus_num_found = request.POST.get('scopus_num_found')
+        scopus_all = []
+        scopus_similarities = ast.literal_eval(request.POST.get('scopus_similarities'))
+    
+        
+        for i in range(min(10, len(scopus_id))):
+            entry = {
+                'scopus_id': scopus_id[i],
+                'scopus_title': scopus_title[i],
+                'scopus_similarities': scopus_similarities[i]
+            }
+            scopus_all.append(entry)
 
+        return render(request, 'search/searchlist.html', {'scopus_all': scopus_all, 'scopus_num_found': scopus_num_found, 'scopus_similarities': scopus_similarities})
+    
+    elif request.method == 'GET':
+        return render(request, 'search/searchlist.html')
+    
 class SearchScopus():
     con_file = open("config.json")
     config = json.load(con_file)
@@ -68,6 +92,8 @@ class SearchScopus():
     scopus_abstract = []
     scopus_doi = []
     scopus_similarities = []
+    novelty_grade = 0
+    highest_similarity = 0
 
     client = ElsClient(config['apikey'])
 
@@ -116,38 +142,38 @@ class SearchScopus():
             vectorizer = TfidfVectorizer()
             tfidf_matrix = vectorizer.fit_transform([user_abstract_str, api_abstract_str])
             similarity_matrix = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix)
-            
-            # # Debugging: Cetak nilai TF-IDF matrix
-            # print("TF-IDF Matrix:")
-            # print(tfidf_matrix.toarray())
+        
 
             similarity_matrix = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix)
-
-            # # Debugging: Cetak nilai similarity_matrix
-            # print("Similarity Matrix:")
-            # print(similarity_matrix)
             
             # Convert similarity to percentage
-            similarity_percentage = similarity_matrix[0][1] * 100
-            api_similarities.append(similarity_percentage)
-            
-        self.scopus_similarities = api_similarities
-        # print(self.scopus_similarities)
-        return api_similarities
+
+            similarity_percentage = round(similarity_matrix[0][1] * 100, 1)
+            self.scopus_similarities.append(similarity_percentage)
+            # print(self.scopus_similarities)
+        return self.scopus_similarities
+    
+    
+    def highest_similarity_percentage(self):
+        data = self.scopus_similarities
+        highdata = data
+        # highdata.sort(reverse=True)
+        self.highest_similarity_percentage = max(highdata)       
+        return self.highest_similarity_percentage
 
     
     
     def calculate_novelty(self, num_searched_titles, avg_similarity):
         if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
-            return 1
+            self.novelty_grade=1
         elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10 or self.keyword_found > 7000000:
-            return 2
+            self.novelty_grade= 2
         elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
-            return 3
-        elif num_searched_titles < 5 or avg_similarity>=3 or self.keyword_found > 1000000:
-            return 4
+            self.novelty_grade= 3
+        elif num_searched_titles < 5 or avg_similarity<=3 or self.keyword_found < 1000000:
+            self.novelty_grade= 4
         
-        return None
+        return self.novelty_grade
     
     
     def getScopusData(self, user_abstract):
@@ -172,8 +198,8 @@ class SearchScopus():
             self.scopus_abstract = self.getAbstract()
 
             # Hitung nilai novelty
-            similarities = self.calculate_similarity_for_all(user_abstract)
-            avg_similarity = sum(similarities) / len(self.scopus_id)
+            similarity = self.calculate_similarity_for_all(user_abstract)
+            avg_similarity = sum(similarity) / len(self.scopus_id)
             novelty = self.calculate_novelty(self.num_found, avg_similarity)
 
             # Print nilai novelty
@@ -182,8 +208,8 @@ class SearchScopus():
             print(f"Novelty: {novelty}")
 
         # Print nilai similarity untuk setiap ID
-        similarities = self.calculate_similarity_for_all(user_abstract)
-        for idx, similarity in enumerate(similarities):
+        similarity = self.calculate_similarity_for_all(user_abstract)
+        for idx, similarity in enumerate(similarity):
             if idx < len(self.scopus_id):  
                 print(f"Scopus ID: {self.scopus_id[idx]}, Similarity: {similarity:.2f}%")
             else:
@@ -201,7 +227,11 @@ class SearchScopus():
         
         return self.keyword
 
-    
+
+    def getAllSimilarity(self):
+        print(self.scopus_similarities)
+        return self.scopus_similarities
+        
     def dataId(self):
         return self.scopus_id
 
@@ -213,6 +243,9 @@ class SearchScopus():
 
     def numFound(self):
         return self.num_found
-    
+
+    def noveltyGrade(self):
+        return self.novelty_grade
+
     def keywordFound(self):
         return self.keyword_found
