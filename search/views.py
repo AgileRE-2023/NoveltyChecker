@@ -12,10 +12,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 import nltk
-import ast
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
 
-nltk.download('stopwords')
-nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('punkt')
 
 
 def search(request):
@@ -33,17 +34,18 @@ def search(request):
             scopus_title = scopus.dataTitle()
             scopus_abstract = scopus.dataAbstract()
             scopus_num_found = scopus.numFound()
-            novelty_grade = scopus.noveltyGrade()
+            scopus_keyword_found = scopus.keywordFound()
 
             # Print hasil ke konsol
             print("Scopus ID:", scopus_id)
             print("Title:", scopus_title)
             print("Abstract:", scopus_abstract)
             print("Number of results found:", scopus_num_found)
+            print("Keyword found:", scopus_keyword_found)
 
             similarities = scopus.calculate_similarity_for_all(user_abstract) 
 
-            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'similarities': similarities, 'novelty_grade':novelty_grade, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract})
+            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'similarities': similarities, 'scopus_num_found': scopus_num_found})
 
     return render(request, 'search/searchpage.html')
 
@@ -51,38 +53,21 @@ def report(request):
     return render(request, 'search/searchreport.html')
 
 def list(request):
-    if request.method == 'POST':
-        scopus_id = ast.literal_eval(request.POST.get('scopus_id'))
-        scopus_title = ast.literal_eval(request.POST.get('scopus_title'))
-        scopus_abstract = ast.literal_eval(request.POST.get('scopus_abstract'))
-        scopus_num_found = request.POST.get('scopus_num_found')
-        scopus_all = []
-        
-        for i in range(min(10, len(scopus_id))):
-            entry = {
-                'scopus_id': scopus_id[i],
-                'scopus_title': scopus_title[i],
-                'scopus_abstract': scopus_abstract[i]
-            }
-            scopus_all.append(entry)
-
-        return render(request, 'search/searchlist.html', {'scopus_all': scopus_all, 'scopus_num_found': scopus_num_found})
-
-    elif request.method == 'GET':
-        return render(request, 'search/searchlist.html')
+    return render(request, 'search/searchlist.html')
 
 class SearchScopus():
     con_file = open("config.json")
     config = json.load(con_file)
     con_file.close()
     query = ''
+    keyword = ''
     num_found = ''
+    keyword_found = ''
     scopus_id = []
     scopus_title = []
     scopus_abstract = []
     scopus_doi = []
-    novelty_grade = 0
-    highest_similarity = 0
+    scopus_similarities = []
 
     client = ElsClient(config['apikey'])
 
@@ -92,7 +77,7 @@ class SearchScopus():
     def getAbstract(self):
         for i in range(min(10, len(self.scopus_id))):
             scp_doc = AbsDoc(scp_id = self.scopus_id[i])
-            if scp_doc.read(self.client):
+            if scp_doc.read(self.client):   
                 self.scopus_abstract.append(scp_doc.data["coredata"]["dc:description"])
                 # self.scopus_doi.append(scp_doc.data["coredata"]["prism:url"])
             else:
@@ -145,46 +130,34 @@ class SearchScopus():
             # Convert similarity to percentage
             similarity_percentage = similarity_matrix[0][1] * 100
             api_similarities.append(similarity_percentage)
-
+            
+        self.scopus_similarities = api_similarities
+        # print(self.scopus_similarities)
         return api_similarities
 
-    def calculate_novelty(self, num_searched_titles, similarities, high_similarity_threshold=0.3):
-        if num_searched_titles < 4 or len(similarities) < 4:
-            return None
-
-        similarities_array = np.array([[sim] for sim in similarities])
-        high_similarity_count = sum(1 for sim in similarities if sim > high_similarity_threshold)
-        high_similarity_column = np.full((len(similarities), 1), high_similarity_count)
-        data_for_clustering = np.concatenate((similarities_array, high_similarity_column), axis=1)
-        scaler = StandardScaler()
-        data_for_clustering = scaler.fit_transform(data_for_clustering)
-        kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42, n_init=10)
-        kmeans.fit(data_for_clustering)
-        cluster_labels = kmeans.labels_
-        avg_similarity_per_cluster = [np.mean(np.array(similarities)[cluster_labels == i]) for i in range(4)]
-        novelty_cluster = avg_similarity_per_cluster.index(max(avg_similarity_per_cluster))+1
-
-        self.novelty_grade = novelty_cluster
-        return novelty_cluster
-
     
     
-    # def calculate_novelty(self, num_searched_titles, avg_similarity):
-    #     if 6000 <= num_searched_titles <= 10000000 or avg_similarity >= 12:
-    #         return 1
-    #     elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10:
-    #         return 2
-    #     elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5:
-    #         return 3
-    #     elif num_searched_titles < 5 or avg_similarity>=3:
-    #         return 4
+    def calculate_novelty(self, num_searched_titles, avg_similarity):
+        if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
+            return 1
+        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10 or self.keyword_found > 7000000:
+            return 2
+        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
+            return 3
+        elif num_searched_titles < 5 or avg_similarity>=3 or self.keyword_found > 1000000:
+            return 4
         
-    #     return None
-
+        return None
+    
+    
     def getScopusData(self, user_abstract):
         doc_srch = ElsSearch(self.query, 'scopus')
         doc_srch.execute(self.client, get_all=False)
+        SearchScopus.extract_features(self)
         self.num_found = doc_srch.tot_num_res
+        key_srch = ElsSearch(self.keyword, 'scopus')
+        key_srch.execute(self.client, get_all=False)
+        self.keyword_found = key_srch.tot_num_res
 
         # Pastikan jumlah hasil pencarian memadai
         num_results = min(10, self.num_found)
@@ -192,11 +165,6 @@ class SearchScopus():
             scp_clear = doc_srch.results[i]['dc:identifier'].replace('SCOPUS_ID:', '')
             self.scopus_title.append(doc_srch.results[i]['dc:title'])
             self.scopus_id.append(scp_clear)
-
-            if 'prism:doi' in doc_srch.results[i]:
-                self.scopus_doi.append(doc_srch.results[i]['prism:doi'])
-            else:
-                self.scopus_doi.append('None')
             
         self.scopus_abstract = []
 
@@ -206,7 +174,7 @@ class SearchScopus():
             # Hitung nilai novelty
             similarities = self.calculate_similarity_for_all(user_abstract)
             avg_similarity = sum(similarities) / len(self.scopus_id)
-            novelty = self.calculate_novelty(self.num_found, similarities)
+            novelty = self.calculate_novelty(self.num_found, avg_similarity)
 
             # Print nilai novelty
             print(self.num_found)
@@ -221,6 +189,19 @@ class SearchScopus():
             else:
                 print("Index out of range. Check the lengths of self.scopus_id and similarities.")
 
+    def extract_features(self):
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(self.query)
+
+        # Remove stop words from noun chunks
+        noun_phrases = [' AND '.join(token.text for token in chunk if token.text.lower() not in STOP_WORDS) for chunk in doc.noun_chunks]
+        filtered_noun_phrases = [' '.join(phrase.split(' AND ')) for phrase in noun_phrases]
+        self.keyword = filtered_noun_phrases[0]
+        
+        
+        return self.keyword
+
+    
     def dataId(self):
         return self.scopus_id
 
@@ -233,5 +214,5 @@ class SearchScopus():
     def numFound(self):
         return self.num_found
     
-    def noveltyGrade(self):
-        return self.novelty_grade
+    def keywordFound(self):
+        return self.keyword_found
