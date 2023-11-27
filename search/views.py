@@ -36,9 +36,10 @@ def search(request):
             scopus_abstract = scopus.dataAbstract()
             scopus_num_found = scopus.numFound()
             scopus_keyword_found = scopus.keywordFound()
-            novelty_grade = scopus.noveltyGrade()
             highest_similarity = scopus.highest_similarity_percentage()
-            scopus_similarities = scopus.getAllSimilarity()    
+            scopus_similarities = scopus.getAllSimilarity()
+            scopus_message = scopus.message()  
+            novelty_grade = scopus.noveltyGrade()
             
             # Print hasil ke konsol
             print("Scopus ID:", scopus_id)
@@ -49,7 +50,7 @@ def search(request):
 
             similarities = scopus.calculate_similarity_for_all(user_abstract) 
 
-            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
+            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_message':scopus_message, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
 
     return render(request, 'search/searchpage.html')
 
@@ -163,16 +164,22 @@ class SearchScopus():
     
     
     def calculate_novelty(self, num_searched_titles, avg_similarity):
-        if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
-            self.novelty_grade=1
-        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10 or self.keyword_found > 7000000:
-            self.novelty_grade= 2
-        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
-            self.novelty_grade= 3
-        elif num_searched_titles < 5 or avg_similarity<=3 or self.keyword_found < 1000000:
-            self.novelty_grade= 4
         
-        return self.novelty_grade
+        if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
+            self.novelty_grade = 1
+            self.scopus_message = f"Nilai novelty 1 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang sangat tinggi untuk jurnal baru."
+        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10 or self.keyword_found > 7000000:
+            self.novelty_grade = 2
+            self.scopus_message = f"Nilai novelty 2 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang tinggi untuk jurnal baru."
+        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
+            self.novelty_grade = 3
+            self.scopus_message = f"Nilai novelty 3 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang cukup tinggi untuk jurnal baru."
+        elif num_searched_titles < 5 or avg_similarity <= 3 or self.keyword_found < 1000000:
+            self.novelty_grade = 4
+            self.scopus_message = f"Nilai novelty 4 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang rendah untuk jurnal baru."
+        
+        return self.novelty_grade, self.scopus_message
+
     
     
     def getScopusData(self, user_abstract):
@@ -206,13 +213,13 @@ class SearchScopus():
             print(f"Average Similarity: {avg_similarity:.2f}%")
             print(f"Novelty: {novelty}")
 
-        # Print nilai similarity untuk setiap ID
-        similarity = self.calculate_similarity_for_all(user_abstract)
-        for idx, similarity in enumerate(similarity):
-            if idx < len(self.scopus_id):  
-                print(f"Scopus ID: {self.scopus_id[idx]}, Similarity: {similarity:.2f}%")
-            else:
-                print("Index out of range. Check the lengths of self.scopus_id and similarities.")
+        # # Print nilai similarity untuk setiap ID
+        # similarity = self.calculate_similarity_for_all(user_abstract)
+        # for idx, similarity in enumerate(similarity):
+        #     if idx < len(self.scopus_id):  
+        #         print(f"Scopus ID: {self.scopus_id[idx]}, Similarity: {similarity:.2f}%")
+        #     else:
+        #         print("Index out of range. Check the lengths of self.scopus_id and similarities.")
 
     def extract_features(self):
         nlp = spacy.load("en_core_web_sm")
@@ -247,3 +254,6 @@ class SearchScopus():
     
     def keywordFound(self):
         return self.keyword_found
+    
+    def message(self):
+        return self.scopus_message
