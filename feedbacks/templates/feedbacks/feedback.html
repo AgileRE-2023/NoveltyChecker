@@ -45,6 +45,20 @@
       color: #c59b08;
     }
   </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const stars = document.querySelectorAll(".rate input");
+      const ratingDisplay = document.querySelector(".fw-bold");
+  
+      stars.forEach((star) => {
+        star.addEventListener("change", function () {
+          const selectedValue = this.value;
+          ratingDisplay.textContent = selectedValue;
+        });
+      });
+    });
+  </script>
+  
 </head>
 
 <body style="background-color: #412a6e">
@@ -121,6 +135,7 @@
       </a>
     </div>
   </div>
+
 </body>
 
 <!-- Batas bawah ngoding -->
