@@ -1,5 +1,5 @@
 import ast
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from elsapy.elsdoc import AbsDoc
@@ -13,14 +13,19 @@ import nltk
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
+from search.models import Manuscript
+
 # nltk.download('stopwords')
 # nltk.download('punkt')
 
 
-def search(request):
+def search(request, user):
+    username = user
     if request.method == 'POST':
         query = request.POST.get('title')
         user_abstract = request.POST.get('abstract')
+        
+        
 
         if query == '' and user_abstract == '':
             return render(request, 'search/searchreport.html', {'error': 'Please fill all the fields'})
@@ -37,6 +42,7 @@ def search(request):
             scopus_similarities = scopus.getAllSimilarity()
             scopus_message = scopus.message()  
             novelty_grade = scopus.noveltyGrade()
+            api_response = scopus.getApi()
             
             # Print hasil ke konsol
             print("Scopus ID:", scopus_id)
@@ -45,11 +51,14 @@ def search(request):
             print("Number of results found:", scopus_num_found)
             print("Keyword found:", scopus_keyword_found)
 
-            similarities = scopus.calculate_similarity_for_all(user_abstract) 
+            similarities = scopus.calculate_similarity_for_all(user_abstract)
+
+            manuscript = Manuscript()
+            manuscript.createManuscript(manuscript_title=query, manuscript_owner=request.user, manuscript_abstract=user_abstract, manuscript_api=api_response, novelty_score=novelty_grade, similarity_percentage=highest_similarity)
 
             return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_message':scopus_message, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
 
-    return render(request, 'search/searchpage.html')
+    return render(request, 'search/searchpage.html', {'user': username})
 
 def report(request):
     return render(request, 'search/searchreport.html')
@@ -92,6 +101,8 @@ class SearchScopus():
     scopus_similarities = []
     novelty_grade = 0
     highest_similarity = 0
+    scopus_message = ''
+    api = ''
 
     client = ElsClient(config['apikey'])
 
@@ -149,6 +160,8 @@ class SearchScopus():
             similarity_percentage = round(similarity_matrix[0][1] * 100, 1)
             self.scopus_similarities.append(similarity_percentage)
             # print(self.scopus_similarities)
+            self.highest_similarity = self.highest_similarity_percentage()
+
         return self.scopus_similarities
     
     
@@ -156,8 +169,11 @@ class SearchScopus():
         data = self.scopus_similarities
         highdata = data
         # highdata.sort(reverse=True)
-        self.highest_similarity_percentage = max(highdata)       
-        return self.highest_similarity_percentage
+        if len(highdata) > 0:
+            self.highest_similarity = max(highdata)
+        else:
+            self.highest_similarity = 0       
+        return self.highest_similarity
 
     
     
@@ -184,6 +200,7 @@ class SearchScopus():
         doc_srch = ElsSearch(self.query, 'scopus')
         doc_srch.execute(self.client, get_all=False)
         SearchScopus.extract_features(self)
+        self.api = doc_srch.results
         self.num_found = doc_srch.tot_num_res
         key_srch = ElsSearch(self.keyword, 'scopus')
         key_srch.execute(self.client, get_all=False)
@@ -211,13 +228,11 @@ class SearchScopus():
             print(f"Average Similarity: {avg_similarity:.2f}%")
             print(f"Novelty: {novelty}")
 
-        # # Print nilai similarity untuk setiap ID
-        # similarity = self.calculate_similarity_for_all(user_abstract)
-        # for idx, similarity in enumerate(similarity):
-        #     if idx < len(self.scopus_id):  
-        #         print(f"Scopus ID: {self.scopus_id[idx]}, Similarity: {similarity:.2f}%")
-        #     else:
-        #         print("Index out of range. Check the lengths of self.scopus_id and similarities.")
+        else:
+            print("No results found.")
+            self.novelty_grade = 4
+            self.scopus_message = f"Nilai novelty 4 karena jurnal Anda tidak memiliki result found yang sama dan hanya memiliki {self.keyword_found} keyword yang sama"
+       
 
     def extract_features(self):
         nlp = spacy.load("en_core_web_sm")
@@ -256,3 +271,6 @@ class SearchScopus():
     
     def message(self):
         return self.scopus_message
+    
+    def getApi(self):
+        return self.api
