@@ -1,5 +1,5 @@
 import ast
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from elsapy.elsdoc import AbsDoc
@@ -19,10 +19,13 @@ from search.models import Manuscript
 # nltk.download('punkt')
 
 
-def search(request):
+def search(request, user):
+    username = user
     if request.method == 'POST':
         query = request.POST.get('title')
         user_abstract = request.POST.get('abstract')
+        
+        
 
         if query == '' and user_abstract == '':
             return render(request, 'search/searchreport.html', {'error': 'Please fill all the fields'})
@@ -55,7 +58,7 @@ def search(request):
 
             return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_message':scopus_message, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
 
-    return render(request, 'search/searchpage.html')
+    return render(request, 'search/searchpage.html', {'user': username})
 
 def report(request):
     return render(request, 'search/searchreport.html')
