@@ -2,20 +2,110 @@
 <!-- Block Liner -->
 {% load static %} {%block content %}
 <!-- Ngodingnya disini -->
+<head>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    .ungu-bro-bg {
+      background-color: #422b73 !important;
+    }
+    .ungu-bro-color {
+      color: #422b73 !important;
+    }
+    .ungu-bro-border {
+      border-color: #422b73 !important;
+    }
 
-<style>
-  .ungu-bro-bg {
-    background-color: #422b73 !important;
-  }
-  .ungu-bro-color {
-    color: #422b73 !important;
-  }
-  .ungu-bro-border {
-    border-color: #422b73 !important;
-  }
-</style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Lato", sans-serif;
+    }
+    .loader {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      width: 400px;
+      height: 300px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      margin: auto;
+    }
+    .loader .image {
+      width: 400px;
+      height: 500px;
+      font-size: 200px;
+      text-align: center;
+      transform-origin: bottom center;
+      animation: 3s rotate infinite;
+      opacity: 0;
+      color: #2ee8b6;
+    }
 
-<div>
+    @keyframes rotate {
+      0% {
+        transform: rotate(90deg);
+      }
+      10% {
+        opacity: 0;
+      }
+      35% {
+        transform: rotate(0deg);
+        opacity: 1;
+      }
+      65% {
+        transform: rotate(0deg);
+        opacity: 1;
+      }
+      80% {
+        opacity: 0;
+      }
+      100% {
+        transform: rotate(-90deg);
+      }
+    }
+  </style>
+</head>
+
+<!-- Loading Screen -->
+<div class="loader" id="loading">
+  <div class="image">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+  function showLoading() {
+    document.getElementById("page1").style.display = "none";
+    document.getElementById("page2").style.display = "none";
+    document.getElementById("page3").style.display = "none";
+    document.getElementById("page4").style.display = "none";
+    document.getElementById("loading").style.display = "block";
+  }
+  function startProcessing() {
+    showLoading();
+
+    setTimeout(function () {
+      showResult();
+    }, 5000);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("loading").style.display = "none";
+  });
+</script>
+
+<!-- Content -->
+<div id="page1">
   <div class="my-4 d-flex flex-row justify-content-end align-items-center">
     <span class="h-fit self-center text-xl border-b-2 border-black"
       >{{ user }}</span
@@ -42,7 +132,7 @@
   </div>
   <div class="border-bottom border-black border-2"></div>
 </div>
-<div class="py-5">
+<div id="page2" class="py-5">
   <form action="" method="post">
     {% csrf_token %}
     <div class="form-floating mb-3 col-sm-4 offset-sm-0">
@@ -78,6 +168,7 @@
           class="btn btn-primary ungu-bro-bg border-0 d-flex text-decoration-none"
           type="submit"
           value="Sign In"
+          onclick="startProcessing()"
         >
           <span class="me-2 text-decoration-none">Search</span
           ><span class="material-symbols-outlined me-1 text-decoration-none">
@@ -89,7 +180,7 @@
   </form>
 </div>
 <div class="border-bottom border-black border-2"></div>
-<div class="py-5">
+<div id="page3" class="py-5">
   <div class="d-flex col-2 border-bottom border-black border-4 text-center">
     <div class="py-2">Search History</div>
   </div>
@@ -114,7 +205,7 @@
     <div class="border-bottom border-light-subtle border-2"></div>
   </div>
 </div>
-<div class="border-bottom border-black border-2"></div>
+<div id="page4" class="border-bottom border-black border-2"></div>
 
 <!-- Batas bawah ngoding -->
 {% endblock %}
