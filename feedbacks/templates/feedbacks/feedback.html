@@ -49,7 +49,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       const stars = document.querySelectorAll(".rate input");
       const ratingDisplay = document.querySelector(".fw-bold");
-  
+
       stars.forEach((star) => {
         star.addEventListener("change", function () {
           const selectedValue = this.value;
@@ -58,7 +58,6 @@
       });
     });
   </script>
-  
 </head>
 
 <body style="background-color: #412a6e">
@@ -73,69 +72,73 @@
   </p>
 
   <!-- Rating -->
-  <div class="d-flex flex-row justify-content-center" style="height: auto">
-    <div class="position-absolute" style="margin: 10px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="d-flex flex-row justify-content-center" style="height: auto">
+      <div class="position-absolute" style="margin: 10px">
+        <div
+          class="rate ps-4 pe-4 pt-0 pb-2"
+          style="background-color: white; border-radius: 15px"
+        >
+          <input type="radio" id="star5" name="rate" value="5" />
+          <label for="star5" title="text">5 stars</label>
+          <input type="radio" id="star4" name="rate" value="4" />
+          <label for="star4" title="text">4 stars</label>
+          <input type="radio" id="star3" name="rate" value="3" />
+          <label for="star3" title="text">3 stars</label>
+          <input type="radio" id="star2" name="rate" value="2" />
+          <label for="star2" title="text">2 stars</label>
+          <input type="radio" id="star1" name="rate" value="1" />
+          <label for="star1" title="text">1 star</label>
+        </div>
+      </div>
       <div
-        class="rate ps-4 pe-4 pt-0 pb-2"
-        style="background-color: white; border-radius: 15px;"
+        class="text-center"
+        style="
+          background-color: #2ee8b6;
+          width: 10vh;
+          border-radius: 10px;
+          margin-left: 30vh;
+        "
       >
-        <input type="radio" id="star5" name="rate" value="5" />
-        <label for="star5" title="text">5 stars</label>
-        <input type="radio" id="star4" name="rate" value="4" />
-        <label for="star4" title="text">4 stars</label>
-        <input type="radio" id="star3" name="rate" value="3" />
-        <label for="star3" title="text">3 stars</label>
-        <input type="radio" id="star2" name="rate" value="2" />
-        <label for="star2" title="text">2 stars</label>
-        <input type="radio" id="star1" name="rate" value="1" />
-        <label for="star1" title="text">1 star</label>
+        <p class="fw-bold ms-3 pt-3 fs-4 pb-0" style="color: white">4</p>
       </div>
     </div>
-    <div
-      class="text-center"
-      style="
-        background-color: #2ee8b6;
-        width: 10vh;
-        border-radius: 10px;
-        margin-left: 30vh;
-      "
-    >
-      <p class="fw-bold ms-3 pt-3 fs-4 pb-0" style="color: white">4</p>
-    </div>
-  </div>
 
-  <!-- How were -->
-  <div class="">
-    <p class="fw-light fs-4 ms-3 mt-5 pt-2" style="color: white">
-      How were the accuracy results?
-    </p>
-    <textarea
-      style="
-        outline: none;
-        resize: none;
-        height: 25vh;
-        width: 100%;
-        padding: 15px;
-        border-radius: 15px;
-      "
-      class="content-text"
-      id="content"
-      name="content"
-      placeholder="Your feedback means a lot to us!"
-    ></textarea>
+    <!-- How were -->
+    <div class="">
+      <p class="fw-light fs-4 ms-3 mt-5 pt-2" style="color: white">
+        How were the accuracy results?
+      </p>
+      <div class="d-none">
+        <input value= "{{ feedback_manuscript }}" name="feedback_manuscript" />
+      </div>
+      <textarea
+        style="
+          outline: none;
+          resize: none;
+          height: 25vh;
+          width: 100%;
+          padding: 15px;
+          border-radius: 15px;
+        "
+        class="content-text"
+        id="content"
+        name="content"
+        placeholder="Your feedback means a lot to us!"
+      ></textarea>
 
-    <div class="d-flex justify-content-center mt-3">
-      <a href="{% url 'search'%}">
+      <div class="d-flex justify-content-center mt-3">
         <button
           class="btn btn-primary ps-4 pe-4"
           style="background-color: #2ee8b6; color: #412a6e"
+          type="submit"
         >
           Send
         </button>
-      </a>
+      </div>
     </div>
-  </div>
-
+  </form>
 </body>
 
 <!-- Batas bawah ngoding -->
