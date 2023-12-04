@@ -19,8 +19,8 @@ from search.models import Manuscript
 # nltk.download('punkt')
 
 
-def search(request, user):
-    username = user
+def search(request):
+    username = request.user.username
     if request.method == 'POST':
         query = request.POST.get('title')
         user_abstract = request.POST.get('abstract')
@@ -55,8 +55,9 @@ def search(request, user):
 
             manuscript = Manuscript()
             manuscript.createManuscript(manuscript_title=query, manuscript_owner=request.user, manuscript_abstract=user_abstract, manuscript_api=api_response, novelty_score=novelty_grade, similarity_percentage=highest_similarity)
-
-            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_message':scopus_message, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity})
+            manuscript.save()
+            
+            return render(request, 'search/searchreport.html', {'scopus_id': scopus_id, 'scopus_title': scopus_title, 'scopus_abstract': scopus_abstract, 'scopus_similarities': scopus_similarities, 'novelty_grade':novelty_grade, 'scopus_message':scopus_message, 'scopus_num_found': scopus_num_found, 'query': query, 'user_abstract': user_abstract, 'highest_similarity': highest_similarity, 'user': username, 'scopus_keyword_found': scopus_keyword_found, 'api_response': api_response, 'feedback_manuscript': manuscript})
 
     return render(request, 'search/searchpage.html', {'user': username})
 
@@ -182,7 +183,7 @@ class SearchScopus():
         if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
             self.novelty_grade = 1
             self.scopus_message = f"Nilai novelty 1 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang sangat tinggi untuk jurnal baru."
-        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 10 or self.keyword_found > 7000000:
+        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 8 or self.keyword_found > 7000000:
             self.novelty_grade = 2
             self.scopus_message = f"Nilai novelty 2 karena jurnal Anda memiliki {num_searched_titles} result found yang sama dan {self.keyword_found} keyword yang sama, terdapat similarity {self.highest_similarity}% yang tinggi untuk jurnal baru."
         elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
