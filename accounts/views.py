@@ -7,10 +7,12 @@ def signin(request):
     if request.method == 'POST':
         uname=request.POST.get('username')
         pass1=request.POST.get('password')
+        
 
         user = authenticate(request, username=uname, password=pass1)
         if user is not None:
             login(request, user)
+            # return render(request, '../search/search.html', {'user': uname})
             return redirect('search')
         else:
             return render(request, 'accounts/signin.html', {'error': 'Invalid Credentials'})
