@@ -56,7 +56,7 @@
 <div>
   <div class="my-4 d-flex flex-row justify-content-end align-items-center">
     <span class="h-fit self-center text-xl border-b-2 border-black"
-      >Username</span
+      >{{ user }}</span
     >
 
     <a href=""
@@ -117,10 +117,7 @@
               class="ms-5 me-5 pt-4 pc-4"
               style="text-align: justify; padding-right: 21vh"
             >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia
-              nobis labore, modi voluptates distinctio, rerum corrupti ullam
-              repellat doloremque saepe hic pariatur ea accusantium dicta
-              excepturi numquam aperiam.
+            {{ scopus_message }}
             </p>
           </div>
           <div
@@ -172,7 +169,7 @@
               margin-top: 10px;
             "
           >
-            90
+          {{ highest_similarity }} %
           </h4>
           <div class="details" style="margin-top: 10px">
             <ul></ul>
@@ -182,7 +179,12 @@
       </div>
 
       <div class="d-flex flex-column justify-content-center">
-        <button
+        <form action="{% url 'feedback' %}">
+          {% csrf_token %}
+          <div style="display: none">
+            <input value="{{ feedback_manuscript }}" name="feedback_manuscript" />
+          </div>
+          <button
           style="
             width: 195px;
             height: 40px;
@@ -190,12 +192,15 @@
             color: #412a6e;
           "
           class="btn btn-primary border-0 d-flex text-decoration-none align-self-end"
+          
         >
-          <span class="me-2 text-decoration-none">Crate a new search</span>
+          <span class="me-2 text-decoration-none">New Search</span>
           <span class="material-symbols-outlined me-1 text-decoration-none"
             >search</span
           >
         </button>
+        </form>
+        
         <form action="{% url 'list' %}" method="POST">
           {% csrf_token %}
           <div style="display: none">
@@ -203,6 +208,7 @@
             <input value="{{ scopus_title }}" name="scopus_title" />
             <input value="{{ scopus_abstract }}" name="scopus_abstract" />
             <input value="{{ scopus_num_found }}" name="scopus_num_found" />
+            <input value="{{ scopus_similarities }}" name= "scopus_similarities" />
           </div>
           <button
             style="width: 195px; height: 40px"
@@ -213,76 +219,6 @@
         </form>
       </div>
     </div>
-
-    {% comment %}
-    <div class="d-flex flex-row">
-      <div>
-        <p></p>
-      </div>
-      <div
-        class="report-stats d-flex flex-column justify-content-center"
-        style="
-          position: relative;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <div class="chart-container" style="position: relative">
-          <canvas
-            class="my-chart mt-0"
-            style="width: 300px; height: 300px; justify-self: center"
-          ></canvas>
-          <h4
-            style="
-              position: absolute;
-              top: 40%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              margin-top: 10px;
-            "
-          >
-            90
-          </h4>
-          <div class="details" style="margin-top: 10px">
-            <ul></ul>
-          </div>
-          <h2 class="chart-heading" style="text-align: center">Similarity</h2>
-        </div>
-      </div>
-
-      <div class="d-flex flex-column justify-content-center">
-        <button
-          style="
-            width: 195px;
-            height: 40px;
-            background-color: #f8f6fb;
-            color: #412a6e;
-          "
-          class="btn btn-primary border-0 d-flex text-decoration-none align-self-end"
-        >
-          <span class="me-2 text-decoration-none">Crate a new search</span>
-          <span class="material-symbols-outlined me-1 text-decoration-none"
-            >search</span
-          >
-        </button>
-        <form action="{% url 'list' %}" method="POST">
-          {% csrf_token %}
-          <div style="display: none">
-            <input value="{{ scopus_id }}" name="scopus_id" />
-            <input value="{{ scopus_title }}" name="scopus_title" />
-            <input value="{{ scopus_abstract }}" name="scopus_abstract" />
-          </div>
-          <button
-            style="width: 195px; height: 40px"
-            class="btn btn-primary ungu-bro-bg border-0 d-flex text-decoration-none align-self-end mt-2"
-          >
-            <span class="me-2 text-decoration-none">List Recommendation </span>
-          </button>
-        </form>
-      </div>
-    </div>
-    {% endcomment %}
   </div>
 </div>
 
@@ -300,7 +236,7 @@
   };
 
   const myData = {
-    a: 660,
+    a: "{{ highest_similarity }}",
   };
 
   myData.b = 100 - myData.a;
