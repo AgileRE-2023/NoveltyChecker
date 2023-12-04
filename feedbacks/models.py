@@ -8,16 +8,16 @@ class Feedback(models.Model):
     feedback_manuscript = models.ForeignKey('search.Manuscript', on_delete=models.CASCADE, null=True)
     feedback_score = models.IntegerField(default=5)
     feedback_content = models.TextField(default='')
-    feedback_date = models.DateTimeField(auto_now_add=True)
+    feedback_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self) -> str:
         return super().__str__()
     
-    def createFeedback(self, feedback_owner, feedback_content, feedback_score):
+    def createFeedback(self, feedback_owner, feedback_manuscript, feedback_content, feedback_score):
         self.feedback_owner = feedback_owner
         self.feedback_content = feedback_content
         self.feedback_score = feedback_score
-        self.save()  # Save the Feedback object to the database
+        self.feedback_manuscript = feedback_manuscript
 
     def deleteFeedback(self, feedback_id):
         self.objects.filter(id=feedback_id).delete()
