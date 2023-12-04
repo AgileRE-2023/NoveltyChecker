@@ -12,7 +12,8 @@ def signin(request):
         user = authenticate(request, username=uname, password=pass1)
         if user is not None:
             login(request, user)
-            return redirect('search', user=uname)
+            # return render(request, '../search/search.html', {'user': uname})
+            return redirect('search')
         else:
             return render(request, 'accounts/signin.html', {'error': 'Invalid Credentials'})
     return render(request, 'accounts/signin.html')

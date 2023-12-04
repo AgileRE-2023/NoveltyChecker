@@ -3,7 +3,7 @@ from django.contrib import auth
 
 # Create your models here.
 class Feedback(models.Model):
-    feedback_id = models.AutoField(primary_key=True, default=0)
+    feedback_id = models.AutoField(primary_key=True, unique=True)
     feedback_owner = models.ForeignKey(auth.models.User, on_delete=models.CASCADE, null=True)
     feedback_manuscript = models.ForeignKey('search.Manuscript', on_delete=models.CASCADE, null=True)
     feedback_score = models.IntegerField(default=5)
@@ -13,11 +13,11 @@ class Feedback(models.Model):
     def __str__(self) -> str:
         return super().__str__()
     
-    def createFeedback(self, feedback_owner, feedback_content, feedback_score):
+    def createFeedback(self, feedback_owner, feedback_manuscript, feedback_content, feedback_score):
         self.feedback_owner = feedback_owner
+        self.feedback_manuscript = feedback_manuscript
         self.feedback_content = feedback_content
         self.feedback_score = feedback_score
-        self.save()  # Save the Feedback object to the database
 
     def deleteFeedback(self, feedback_id):
         self.objects.filter(id=feedback_id).delete()
