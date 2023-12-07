@@ -12,7 +12,8 @@ import json
 import nltk
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
-
+from django.http import JsonResponse
+import subprocess
 from search.models import Manuscript
 
 # nltk.download('stopwords')
@@ -86,6 +87,9 @@ def list(request):
     
     elif request.method == 'GET':
         return render(request, 'search/searchlist.html')
+# def rerun_server(request):
+#     subprocess.run(['python', 'manage.py', 'runserver'])
+#     return JsonResponse({'status': 'success'})
     
 class SearchScopus():
     con_file = open("config.json")
@@ -100,6 +104,7 @@ class SearchScopus():
     scopus_abstract = []
     scopus_doi = []
     scopus_similarities = []
+    avg_similarity = 0.0
     novelty_grade = 0
     highest_similarity = 0
     scopus_message = ''
@@ -178,50 +183,62 @@ class SearchScopus():
 
     
     
-    def calculate_novelty(self, num_searched_titles, avg_similarity):
-        if 6000 <= num_searched_titles or avg_similarity >= 12 or self.keyword_found > 10000000:
+    def calculate_novelty(self):
+        if 6000 <= self.num_found or self.avg_similarity >= 12 or self.keyword_found > 10000000:
             self.novelty_grade = 1
-            if 6000 <= num_searched_titles:
-                self.scopus_message = f"Your journal, with {num_searched_titles} similar results and {self.keyword_found} identical keywords, exhibits an exceptionally high {self.highest_similarity}% similarity. Consider exploring new avenues to enhance its originality."
+            if self.highest_similarity >= 70:
+                self.scopus_message = f"seems like this journal has been published and indexed at scopus."
+            
+            elif 6000 <= self.num_found:
+                self.scopus_message = f"Your journal, with {self.num_found} similar results and {self.keyword_found} identical keywords, exhibits an exceptionally high {self.highest_similarity}% similarity. Consider exploring new avenues to enhance its originality."
 
-            elif avg_similarity >= 12:
-                self.scopus_message = f"While your journal shares {num_searched_titles} results and {self.keyword_found} identical keywords, the extremely high {self.highest_similarity}% similarity suggests the need for unique perspectives to enhance its novelty."
+            elif self.avg_similarity >= 12:
+                self.scopus_message = f"While your journal shares {self.num_found} results and {self.keyword_found} identical keywords, the extremely high {self.highest_similarity}% similarity suggests the need for unique perspectives to enhance its novelty."
 
             elif self.keyword_found > 10000000:
-                self.scopus_message = f"Despite the {num_searched_titles} related results and {self.keyword_found} identical keywords, the remarkably high {self.highest_similarity}% similarity indicates the importance of introducing innovative elements for greater originality."
+                self.scopus_message = f"Despite the {self.num_found} related results and {self.keyword_found} identical keywords, the remarkably high {self.highest_similarity}% similarity indicates the importance of introducing innovative elements for greater originality."
 
-        elif 100 <= num_searched_titles <= 6000 or avg_similarity >= 8 or self.keyword_found > 7000000:
+        elif 100 <= self.num_found <= 6000 or self.avg_similarity >= 8 or self.keyword_found > 7000000:
             self.novelty_grade = 2
-            if 6100 <= num_searched_titles <= 6000:
-                self.scopus_message = f"While your journal, featuring {num_searched_titles} similar results and {self.keyword_found} identical keywords, has a significant {self.highest_similarity}% similarity, consider introducing distinct elements to elevate its uniqueness."
+            if self.highest_similarity >= 70:
+                self.scopus_message = f"seems like this journal has been published and indexed at scopus."
+            
+            elif 100 <= self.num_found <= 6000:
+                self.scopus_message = f"While your journal, featuring {self.num_found} similar results and {self.keyword_found} identical keywords, has a significant {self.highest_similarity}% similarity, consider introducing distinct elements to elevate its uniqueness."
 
-            elif avg_similarity >= 8:
-                self.scopus_message = f"With {num_searched_titles} matching results and {self.keyword_found} identical keywords, your journal demonstrates a notable {self.highest_similarity}% similarity. Consider incorporating diverse perspectives to enhance its originality."
+            elif self.avg_similarity >= 8:
+                self.scopus_message = f"With {self.num_found} matching results and {self.keyword_found} identical keywords, your journal demonstrates a notable {self.highest_similarity}% similarity. Consider incorporating diverse perspectives to enhance its originality."
 
             elif self.keyword_found > 7000000:
-                self.scopus_message = f"Your journal, with {num_searched_titles} related results and {self.keyword_found} identical keywords, showcases a significant {self.highest_similarity}% similarity. Exploring new approaches could contribute to its uniqueness."
+                self.scopus_message = f"Your journal, with {self.num_found} related results and {self.keyword_found} identical keywords, showcases a significant {self.highest_similarity}% similarity. Exploring new approaches could contribute to its uniqueness."
 
-        elif 5 <= num_searched_titles <= 100 or avg_similarity >= 5 or self.keyword_found > 5000000:
+        elif 5 <= self.num_found <= 100 or self.avg_similarity >= 5 or self.keyword_found > 5000000:
             self.novelty_grade = 3
-            if 5 <= num_searched_titles <= 100:
-                self.scopus_message = f"Kudos! Your journal, with {num_searched_titles} similar results and {self.keyword_found} identical keywords, displays a moderate {self.highest_similarity}% similarity. Exploring different angles can further enhance its novelty."
+            if self.highest_similarity >= 70:
+                self.scopus_message = f"seems like this journal has been published and indexed at scopus."
+            
+            elif 5 <= self.num_found <= 100:
+                self.scopus_message = f"Kudos! Your journal, with {self.num_found} similar results and {self.keyword_found} identical keywords, displays a moderate {self.highest_similarity}% similarity. Exploring different angles can further enhance its novelty."
 
-            elif avg_similarity >= 5:
-                self.scopus_message = f"Good effort! Having {num_searched_titles} matching results and {self.keyword_found} identical keywords, your journal showcases a noteworthy {self.highest_similarity}% similarity. Consider introducing varied perspectives to increase its originality."
+            elif self.avg_similarity >= 5:
+                self.scopus_message = f"Good effort! Having {self.num_found} matching results and {self.keyword_found} identical keywords, your journal showcases a noteworthy {self.highest_similarity}% similarity. Consider introducing varied perspectives to increase its originality."
 
             elif self.keyword_found > 5000000:
-                self.scopus_message = f"Excellent contribution! Your journal, with {num_searched_titles} related results and {self.keyword_found} identical keywords, presents a substantial {self.highest_similarity}% similarity. Incorporating diverse elements could further elevate its uniqueness."
+                self.scopus_message = f"Excellent contribution! Your journal, with {self.num_found} related results and {self.keyword_found} identical keywords, presents a substantial {self.highest_similarity}% similarity. Incorporating diverse elements could further elevate its uniqueness."
 
-        elif num_searched_titles < 5 or avg_similarity <= 3 or self.keyword_found < 1000000:
+        elif self.num_found < 5 or self.avg_similarity <= 3 or self.keyword_found < 1000000:
             self.novelty_grade = 4
-            if num_searched_titles < 5:
-                self.scopus_message = f"Fantastic work! Your journal, featuring only {num_searched_titles} results and {self.keyword_found} identical keywords, indicates a low {self.highest_similarity}% similarity. This suggests a promising start towards creating a truly novel contribution."
+            if self.highest_similarity >= 70:
+                self.scopus_message = f"seems like this journal has been published and indexed at scopus."
+            
+            elif self.num_found < 5:
+                self.scopus_message = f"Fantastic work! Your journal, featuring only {self.num_found} results and {self.keyword_found} identical keywords, indicates a low {self.highest_similarity}% similarity. This suggests a promising start towards creating a truly novel contribution."
 
-            elif avg_similarity <= 3:
-                self.scopus_message = f"Great start! With {num_searched_titles} matching results and {self.keyword_found} identical keywords, your journal shows a low {self.highest_similarity}% similarity. Keep exploring new avenues to further enhance its originality."
+            elif self.avg_similarity <= 3:
+                self.scopus_message = f"Great start! With {self.num_found} matching results and {self.keyword_found} identical keywords, your journal shows a low {self.highest_similarity}% similarity. Keep exploring new avenues to further enhance its originality."
 
             elif self.keyword_found < 1000000:
-                self.scopus_message = f"Start of something new! Your journal, with {num_searched_titles} related results and {self.keyword_found} identical keywords, displays a low {self.highest_similarity}% similarity. Every discovery opens doors to uncharted territories."
+                self.scopus_message = f"Start of something new! Your journal, with {self.num_found} related results and {self.keyword_found} identical keywords, displays a low {self.highest_similarity}% similarity. Every discovery opens doors to uncharted territories."
 
         return self.novelty_grade, self.scopus_message
 
@@ -229,6 +246,17 @@ class SearchScopus():
     
     
     def getScopusData(self, user_abstract):
+        self.scopus_id = []
+        self.scopus_title = []
+        self.scopus_abstract = []
+        self.scopus_doi = []
+        self.scopus_similarities = []
+        self.avg_similarity = 0.0
+        self.novelty_grade = 0
+        self.highest_similarity = 0
+        self.scopus_message = ''
+        self.api = ''
+        
         doc_srch = ElsSearch(self.query, 'scopus')
         doc_srch.execute(self.client, get_all=False)
         SearchScopus.extract_features(self)
@@ -250,20 +278,22 @@ class SearchScopus():
         if num_results > 0:
             self.scopus_abstract = self.getAbstract()
 
-            # Hitung nilai novelty
             similarity = self.calculate_similarity_for_all(user_abstract)
-            avg_similarity = sum(similarity) / len(self.scopus_id)
-            novelty = self.calculate_novelty(self.num_found, avg_similarity)
+            self.avg_similarity = sum(similarity) / len(self.scopus_id)
+            novelty = self.calculate_novelty()
 
+            self.scopus_similarities = similarity
+            self.highest_similarity = self.highest_similarity_percentage()
+            self.novelty_grade, self.scopus_message = novelty
+            
             # Print nilai novelty
             print(self.num_found)
-            print(f"Average Similarity: {avg_similarity:.2f}%")
+            print(f"Average Similarity: {self.avg_similarity:.2f}%")
             print(f"Novelty: {novelty}")
 
         else:
             print("No results found.")
-            self.novelty_grade = 4
-            self.scopus_message = f"Nilai novelty 4 karena jurnal Anda tidak memiliki result found yang sama dan hanya memiliki {self.keyword_found} keyword yang sama"
+            novelty = self.calculate_novelty()
        
 
     def extract_features(self):
