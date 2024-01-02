@@ -107,27 +107,29 @@
 </div>
 <div id="page2" class="py-5">
   <form action="" method="post">
-    {% csrf_token %}
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %} {% csrf_token %}
     <div class="form-floating mb-3 col-sm-4 offset-sm-0">
       <input
         type="text"
         class="form-control"
-        id="floatingInput"
+        id="titlefield"
         placeholder="Insert Title Here"
         name="title"
       />
-      <label for="floatingInput">Title</label>
+      <label for="titlefield">Title</label>
     </div>
     <div class="d-flex flex-row align-items-end justify-content-between">
       <div class="form-floating col-sm-10">
         <textarea
           class="form-control"
           placeholder="Insert Abstract Here"
-          id="floatingTextarea2"
+          id="abstractfield"
           style="height: 200px"
           name="abstract"
         ></textarea>
-        <label for="floatingTextarea2">Abstract</label>
+        <label for="abstractfield">Abstract</label>
       </div>
       <div class="d-flex flex-row">
         <button
@@ -142,6 +144,7 @@
           type="submit"
           value="Sign In"
           onclick="startProcessing()"
+          id="search_button"
         >
           <span class="me-2 text-decoration-none">Search</span
           ><span class="material-symbols-outlined me-1 text-decoration-none">
@@ -208,11 +211,7 @@
   });
 
   function changeImage(counter) {
-    var images = [
-      '<i class="fa-solid fa-magnifying-glass"></i>',
-      '<i class="fa-solid fa-book"></i>',
-      '<i class="fa-brands fa-readme"></i>',
-    ];
+    var images = ['<i class="fa-solid fa-magnifying-glass"></i>','<i class="fa-solid fa-magnifying-glass"></i>','<i class="fa-solid fa-magnifying-glass"></i>'];
 
     $(".loader .image").html("" + images[counter] + "");
   }

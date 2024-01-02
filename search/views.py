@@ -28,8 +28,8 @@ def search(request):
         
         
 
-        if query == '' and user_abstract == '':
-            return render(request, 'search/searchreport.html', {'error': 'Please fill all the fields'})
+        if query == '' or user_abstract == '':
+            return render(request, 'search/searchpage.html', {'error': 'Please fill all the fields'})
         else:
             print(query)
             scopus = SearchScopus(query)

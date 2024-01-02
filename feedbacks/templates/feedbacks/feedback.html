@@ -73,7 +73,9 @@
 
   <!-- Rating -->
   <form action="" method="post">
-    {% csrf_token %}
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %} {% csrf_token %}
     <div class="d-flex flex-row justify-content-center" style="height: auto">
       <div class="position-absolute" style="margin: 10px">
         <div
@@ -133,8 +135,16 @@
           class="btn btn-primary ps-4 pe-4"
           style="background-color: #2ee8b6; color: #412a6e"
           type="submit"
+          id="feedback"
         >
           Send
+        </button>
+        <button
+          class="btn btn-bg-primary ps-4 pe-4 mx-2"
+          style="background-color: #ffffff; color: #412a6e"
+          id="no_feedback"
+          onclick= window.location.href = "{% url 'search' %}"> Skip Feedback
+          
         </button>
       </div>
     </div>
