@@ -12,7 +12,6 @@ def signin(request):
         user = authenticate(request, username=uname, password=pass1)
         if user is not None:
             login(request, user)
-            # return render(request, '../search/search.html', {'user': uname})
             return redirect('search')
         else:
             return render(request, 'accounts/signin.html', {'error': 'Invalid Credentials'})
@@ -27,6 +26,9 @@ def signup(request):
 
         if uname == '' or email == '' or pass1 == '' or pass2 == '':
             return render(request, 'accounts/signup.html', {'error':'Please fill all the fields'})
+        
+        if User.objects.filter(username=uname).exists():
+            return render(request, 'accounts/signup.html', {'error':'Username already exists'})
 
         if pass1 != pass2:
             return render(request, 'accounts/signup.html', {'error':'Passwords do not match'})
