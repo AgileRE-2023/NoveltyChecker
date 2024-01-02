@@ -83,6 +83,15 @@ DATABASES = {
     }
 }
 
+BEHAVE = {
+    'DEFAULT_TAGS': '@django',
+    'SHOW_SNIPPET': True,
+    'SHOW_SKIPPED': True,
+    'SHOW_TIMING': True,
+    'ENABLE_ASSERTIONS': True,
+    'STEPS_DIR' : 'tests/acceptance/steps'
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
