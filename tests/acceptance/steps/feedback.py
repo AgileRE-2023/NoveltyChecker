@@ -38,17 +38,30 @@ def step_impl(context):
     new_search_button = context.browser.find_element(By.ID, 'new_search_button')
     new_search_button.click()
 
-
-@when("i fill in Feedback Form with feedback score and comment")
+@when("i fill feedback score with 2")
 def step_impl(context):
-    context.feedback_data = {'comment': 'adelinejulia'}
+    context.browser.find_element(By.XPATH, "//input[@id='star2']")
 
-    # Example: Use Selenium to fill in form fields
+@when("i fill feedback comment with 'This is a test comment'")
+def step_impl(context):
     comment_input = context.browser.find_element(By.ID, 'content')
-    rate_input = context.browser.find_element(By.XPATH, "//input[@id='star2']")
-    context.browser.execute_script("arguments[0].checked = true;",rate_input)
+    comment_input.send_keys('This is a test comment')
 
-    comment_input.send_keys(context.feedback_data['comment'])
+@when("i fill feedback comment with ''")
+def step_impl(context):
+    comment_input = context.browser.find_element(By.ID, 'content')
+    comment_input.send_keys('')
+
+# @when("i fill in Feedback Form with feedback score and comment")
+# def step_impl(context):
+#     context.feedback_data = {'comment': 'adelinejulia'}
+
+#     # Example: Use Selenium to fill in form fields
+#     comment_input = context.browser.find_element(By.ID, 'content')
+#     rate_input = context.browser.find_element(By.XPATH, "//input[@id='star2']")
+#     context.browser.execute_script("arguments[0].checked = true;",rate_input)
+
+#     comment_input.send_keys(context.feedback_data['comment'])
 
 @when("I press Submit Feedback button")
 def step_impl(context):
