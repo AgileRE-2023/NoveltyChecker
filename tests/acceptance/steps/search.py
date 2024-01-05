@@ -98,6 +98,3 @@ def step_impl(context):
 @then("close the browser")
 def step_impl(context):
     context.browser.quit()
-
-    
-    
