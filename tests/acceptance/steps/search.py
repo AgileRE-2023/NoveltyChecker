@@ -22,17 +22,34 @@ def step_impl(context):
     SignIn_button = context.browser.find_element(By.ID, 'signinbutton')
     SignIn_button.click()
 
-@when("i fill all field in Search Form with title and abstract")
+@when("i fill in title field with 'Pluto Unveiled: Nurturing Civilization Beyond the Horizon'")
 def step_impl(context):
-    context.Search_data = {'title': 'admin-chris', 'abstract': 'adelinejulia'}
-    context.browser.get('http://127.0.0.1:8000/search') 
-
-    # Example: Use Selenium to fill in form fields
+    context.browser.get('http://127.0.0.1:8000/search')
     title_input = context.browser.find_element(By.ID, 'titlefield')
-    abstract_input = context.browser.find_element(By.ID, 'abstractfield')
+    title_input.send_keys('Pluto Unveiled: Nurturing Civilization Beyond the Horizon')
 
-    title_input.send_keys(context.Search_data['title'])
-    abstract_input.send_keys(context.Search_data['abstract'])
+@when("i fill in title field with nothing ''")
+def step_impl(context):
+    context.browser.get('http://127.0.0.1:8000/search')
+    title_input = context.browser.find_element(By.ID, 'titlefield')
+    title_input.send_keys('')
+
+@when("i fill in abstract field with 'This is an abstract example'")
+def step_impl(context):
+    abstract_input = context.browser.find_element(By.ID, 'abstractfield')
+    abstract_input.send_keys('This is an abstract example')
+
+# @when("i fill all field in Search Form with title and abstract")
+# def step_impl(context):
+#     context.Search_data = {'title': 'admin-chris', 'abstract': 'adelinejulia'}
+#     context.browser.get('http://127.0.0.1:8000/search') 
+
+#     # Example: Use Selenium to fill in form fields
+#     title_input = context.browser.find_element(By.ID, 'titlefield')
+#     abstract_input = context.browser.find_element(By.ID, 'abstractfield')
+
+#     title_input.send_keys(context.Search_data['title'])
+#     abstract_input.send_keys(context.Search_data['abstract'])
     
 @when("i fill Search Form with title only")
 def step_impl(context):
@@ -81,6 +98,3 @@ def step_impl(context):
 @then("close the browser")
 def step_impl(context):
     context.browser.quit()
-
-    
-    
