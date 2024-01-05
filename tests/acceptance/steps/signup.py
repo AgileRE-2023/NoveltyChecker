@@ -6,7 +6,6 @@ from django.test import Client
 
 @given('I am on SignUp Page')
 def step_impl(context):
-    context.client = Client()
     context.browser = webdriver.Chrome()
 
 
