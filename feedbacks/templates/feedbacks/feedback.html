@@ -113,7 +113,7 @@
         How were the accuracy results?
       </p>
       <div class="d-none">
-        <input value= "{{ feedback_manuscript }}" name="feedback_manuscript" />
+        <input value="{{ feedback_manuscript }}" name="feedback_manuscript" />
       </div>
       <textarea
         style="
@@ -139,13 +139,15 @@
         >
           Send
         </button>
-        <button
+        <a
           class="btn btn-bg-primary ps-4 pe-4 mx-2"
           style="background-color: #ffffff; color: #412a6e"
           id="no_feedback"
           type="button"
-          onclick= window.location.href = "{% url 'search' %}"> Skip Feedback
-        </button>
+          href="{% url 'search' %}"
+        >
+          Skip Feedback
+        </a>
       </div>
     </div>
   </form>
