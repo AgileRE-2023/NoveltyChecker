@@ -79,7 +79,8 @@ htmlcov/
 .coverage.* 
 .cache 
 .pytest_cache/ 
-nosetests.xml 
+nosetests.xml
+reports 
 coverage.xml 
 *.cover 
 .hypothesis/ 
