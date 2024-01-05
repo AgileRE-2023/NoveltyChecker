@@ -24,14 +24,17 @@ def signup(request):
         pass1=request.POST.get('password')
         pass2=request.POST.get('confirmation_password')
 
+        
+
         if uname == '' or email == '' or pass1 == '' or pass2 == '':
             return render(request, 'accounts/signup.html', {'error':'Please fill all the fields'})
+        
+        if pass1 != pass2:
+            return render(request, 'accounts/signup.html', {'error':'Passwords do not match'})
         
         if User.objects.filter(username=uname).exists():
             return render(request, 'accounts/signup.html', {'error':'Username already exists'})
 
-        if pass1 != pass2:
-            return render(request, 'accounts/signup.html', {'error':'Passwords do not match'})
         else:
             my_user=User.objects.create_user(username=uname, email=email, password=pass1)
 
